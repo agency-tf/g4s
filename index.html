@@ -167,7 +167,8 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <button onclick="abrirConfiguracionURL()" title="Configurar Enlace Apps Script / Google Sheet" class="bg-slate-900 hover:bg-slate-800 text-slate-300 px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border border-slate-800">
+          <!-- Botón Conexión Google Ocultado -->
+          <button onclick="abrirConfiguracionURL()" title="Configurar Enlace Apps Script / Google Sheet" class="hidden bg-slate-900 hover:bg-slate-800 text-slate-300 px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border border-slate-800">
             <i class="fas fa-link text-rose-500"></i>
             <span class="hidden md:inline">Conexión Google</span>
           </button>
@@ -191,7 +192,8 @@
         <button onclick="cambiarTab('tab-historial')" id="btn-tab-historial" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition-all flex items-center gap-2 whitespace-nowrap">
           <i class="fas fa-folder-open"></i> Auditoría e Historial
         </button>
-        <button onclick="cambiarTab('tab-script')" id="btn-tab-script" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition-all flex items-center gap-2 whitespace-nowrap ml-auto">
+        <!-- Pestaña Apps Script Ocultada -->
+        <button onclick="cambiarTab('tab-script')" id="btn-tab-script" class="hidden tab-btn px-4 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition-all flex items-center gap-2 whitespace-nowrap ml-auto">
           <i class="fas fa-code text-amber-400"></i> Código Apps Script
         </button>
       </div>
@@ -479,7 +481,7 @@
             <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Código Completo (`Code.gs`)</label>
             <textarea id="codigo-script" readonly class="w-full h-80 p-4 font-mono text-xs bg-slate-900 text-emerald-400 rounded-xl border border-slate-800 outline-none resize-y">
 // =========================================================================
-// GOOGLE APPS SCRIPT BACKEND (G4S GESTION OPERATIVA - CÓDIGO ACTUALIZADO)
+// GOOGLE APPS SCRIPT BACKEND (G4S GESTION OPERATIVA - AISLAMIENTO POR USUARIO)
 // =========================================================================
 
 function doPost(e) {
@@ -502,9 +504,9 @@ function doPost(e) {
       var sheet = ss.getSheetByName("Clientes");
       if (!sheet) {
         sheet = ss.insertSheet("Clientes");
-        sheet.appendRow(["Nombre", "Correo", "Direccion", "Telefono", "CargoContacto", "FechaRegistro"]);
+        sheet.appendRow(["Nombre", "Correo", "Direccion", "Telefono", "CargoContacto", "FechaRegistro", "UsuarioActual"]);
       }
-      sheet.appendRow([data.nombre, data.correo, data.direccion, data.telefono, data.cargoContacto, new Date()]);
+      sheet.appendRow([data.nombre, data.correo, data.direccion, data.telefono, data.cargoContacto, new Date(), data.usuarioActual || ""]);
       return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
     }
 
@@ -514,13 +516,18 @@ function doPost(e) {
       if (sheet) {
         var values = sheet.getDataRange().getValues();
         for (var i = 1; i < values.length; i++) {
-          result.push({
-            nombre: values[i][0],
-            correo: values[i][1],
-            direccion: values[i][2],
-            telefono: values[i][3],
-            cargoContacto: values[i][4]
-          });
+          var clienteUser = values[i][6] || "";
+          // Aislamiento: Solo retoma clientes pertenecientes al usuario solicitante
+          if (!data.usuario || clienteUser === data.usuario || clienteUser === "") {
+            result.push({
+              nombre: values[i][0],
+              correo: values[i][1],
+              direccion: values[i][2],
+              telefono: values[i][3],
+              cargoContacto: values[i][4],
+              usuarioActual: clienteUser
+            });
+          }
         }
       }
       return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
@@ -537,12 +544,10 @@ function doPost(e) {
       }
       sheetH.appendRow([idActa, data.fecha, data.clienteNombre, data.ciudad, data.direccion, data.asistentesCliente, data.cargoCliente, data.asistentesG4S, data.cargoG4S, data.temasTratados, data.conclusiones, data.usuarioNombre]);
 
-      // Generar el PDF institucional con logo oficial
       var htmlTemplate = generarHTMLActa(data);
       var blob = Utilities.newBlob(htmlTemplate, "text/html", "Acta_" + idActa + ".html").getAs("application/pdf");
       blob.setName("Acta_Reunion_G4S_" + idActa + ".pdf");
 
-      // Enviar el correo desde la cuenta actual de Google Sheets
       if (data.clienteCorreo) {
         MailApp.sendEmail({
           to: data.clienteCorreo,
@@ -596,9 +601,9 @@ function generarHTMLActa(d) {
   .header-table { width: 100%; border-bottom: 3px solid #e11d48; padding-bottom: 12px; margin-bottom: 20px; border-collapse: collapse; }
   .logo-img { height: 42px; width: auto; vertical-align: middle; }
   .title-cell { text-align: center; vertical-align: middle; }
-  .title-text { font-size: 13pt; font-weight: 800; text-transform: uppercase; color: #0f172a; margin: 0; tracking: -0.5px; }
+  .title-text { font-size: 13pt; font-weight: 800; text-transform: uppercase; color: #0f172a; margin: 0; }
   .subtitle-text { font-size: 8pt; color: #64748b; font-weight: bold; text-transform: uppercase; margin-top: 2px; }
-  .meta-cell { text-align: right; font-size: 8pt; color: #64748b; font-family: monospace; line-height: 1.3; vertical-align: middle; }
+  .meta-cell { text-align: right; font-size: 8.5pt; color: #64748b; font-family: monospace; line-height: 1.3; vertical-align: middle; }
   
   .section-badge { font-size: 8pt; font-weight: 800; text-transform: uppercase; color: #e11d48; margin-top: 14px; margin-bottom: 6px; letter-spacing: 0.5px; }
   
@@ -629,9 +634,8 @@ function generarHTMLActa(d) {
         <div class="subtitle-text">Control e Inspección Operativa</div>
       </td>
       <td class="meta-cell" style="width: 25%;">
-        <strong>REGISTRO:</strong> OF-RG009<br>
-        <strong>VERSIÓN:</strong> 2.0<br>
-        <strong>FECHA:</strong> ${d.fecha}
+        <strong>FECHA DE EMISIÓN:</strong><br>
+        ${d.fecha}
       </td>
     </tr>
   </table>
@@ -745,9 +749,8 @@ function generarHTMLActa(d) {
               <span class="text-[10px] text-slate-500 uppercase tracking-widest font-extrabold block">Control e Inspección Operativa</span>
             </div>
             <div class="text-right w-1/4 text-[9px] text-slate-500 font-mono leading-tight">
-              <p><strong>DOCUMENTO:</strong> OF-RG009</p>
-              <p><strong>VERSIÓN:</strong> 2.0</p>
-              <p><strong>FECHA:</strong> <span id="pv-fecha">25/06/2026</span></p>
+              <p><strong>FECHA EMISIÓN:</strong></p>
+              <p><span id="pv-fecha">25/06/2026</span></p>
             </div>
           </div>
 
@@ -877,8 +880,8 @@ function generarHTMLActa(d) {
     let sessionUser = null; 
 
     let dbClientes = [
-      { nombre: "Grupo Oriental S.A.", correo: "aportoviejo@gruporiental.com", direccion: "Vía Crucita Km 2.5", telefono: "0991234567", cargoContacto: "Ing. Karen Cedeño - Jefe de Agencia" },
-      { nombre: "Corporación Favorita", correo: "contacto@cfavorita.com", direccion: "Av. Metropolitana", telefono: "0987654321", cargoContacto: "Lic. Roberto Vera - Administrador" }
+      { nombre: "Grupo Oriental S.A.", correo: "aportoviejo@gruporiental.com", direccion: "Vía Crucita Km 2.5", telefono: "0991234567", cargoContacto: "Ing. Karen Cedeño - Jefe de Agencia", usuarioActual: "admin" },
+      { nombre: "Corporación Favorita", correo: "contacto@cfavorita.com", direccion: "Av. Metropolitana", telefono: "0987654321", cargoContacto: "Lic. Roberto Vera - Administrador", usuarioActual: "usuario_demo" }
     ]; 
 
     let dbHistorial = [
@@ -918,7 +921,9 @@ function generarHTMLActa(d) {
         return { success: true };
       }
       if (action === "obtenerClientes") {
-        return dbClientes;
+        // Filtrado estricto: Solo devuelve los clientes creados por el usuario activo
+        const miUsuario = sessionUser ? sessionUser.nombre : (data.usuario || '');
+        return dbClientes.filter(c => c.usuarioActual === miUsuario);
       }
       if (action === "crearActa") {
         const newId = "ACT-" + Math.floor(1000 + Math.random() * 9000);
@@ -975,7 +980,6 @@ function generarHTMLActa(d) {
       document.getElementById('ui-username').innerText = sessionUser.nombre;
       cambiarTab('tab-clientes');
       cargarClientesEnSelect();
-      renderizarDirectorio();
     }
 
     function cerrarSesion() {
@@ -1019,7 +1023,7 @@ function generarHTMLActa(d) {
         direccion: document.getElementById('cli-direccion').value,
         telefono: document.getElementById('cli-telefono').value,
         cargoContacto: document.getElementById('cli-cargo').value,
-        usuarioActual: sessionUser.nombre
+        usuarioActual: sessionUser ? sessionUser.nombre : 'admin'
       };
 
       const res = await pushData('guardarCliente', data);
@@ -1037,10 +1041,11 @@ function generarHTMLActa(d) {
 
     async function cargarClientesEnSelect() {
       const select = document.getElementById('act-cliente');
-      select.innerHTML = '<option value="">Cargando catálogo...</option>';
+      select.innerHTML = '<option value="">Cargando clientes...</option>';
       
-      const res = await pushData('obtenerClientes', {});
-      if (res && Array.isArray(res) && res.length > 0) {
+      const miUsuario = sessionUser ? sessionUser.nombre : '';
+      const res = await pushData('obtenerClientes', { usuario: miUsuario });
+      if (res && Array.isArray(res)) {
         dbClientes = res;
       }
       
@@ -1051,17 +1056,62 @@ function generarHTMLActa(d) {
     function renderizarSelectClientes() {
       const select = document.getElementById('act-cliente');
       select.innerHTML = '<option value="">-- Seleccionar Entidad --</option>';
-      dbClientes.forEach((c, idx) => {
-        select.innerHTML += `<option value="${idx}">${c.nombre}</option>`;
+      
+      // Filtrar únicamente los clientes pertenecientes al usuario registrado
+      const miUsuario = sessionUser ? sessionUser.nombre : '';
+      const misClientes = dbClientes.filter(c => c.usuarioActual === miUsuario);
+
+      misClientes.forEach((c) => {
+        const originalIndex = dbClientes.indexOf(c);
+        select.innerHTML += `<option value="${originalIndex}">${c.nombre}</option>`;
       });
     }
 
     function renderizarDirectorio(filtro = '') {
       const cont = document.getElementById('lista-directorio');
-      const list = dbClientes.filter(c => c.nombre.toLowerCase().includes(filtro.toLowerCase()));
+      const miUsuario = sessionUser ? sessionUser.nombre : '';
+      
+      // Filtrar estrictamente por el usuario que registró la entidad
+      const misClientes = dbClientes.filter(c => c.usuarioActual === miUsuario);
+      const list = misClientes.filter(c => c.nombre.toLowerCase().includes(filtro.toLowerCase()));
 
       if (list.length === 0) {
-        cont.innerHTML = '<div class="col-span-2 text-center py-8 text-slate-400 text-xs">No hay entidades registradas.</div>';
+        cont.innerHTML = '<div class="col-span-2 text-center py-8 text-slate-400 text-xs">No tienes entidades registradas asociadas a tu usuario.</div>';
+        return;
+      }
+
+      cont.innerHTML = list.map((c) => {
+        const originalIndex = dbClientes.indexOf(c);
+        return `
+        <div class="bg-slate-50 hover:bg-rose-50/50 border border-slate-200 hover:border-rose-200 p-3.5 rounded-xl transition-all flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-1">
+              <h4 class="font-bold text-slate-900 text-xs leading-tight">${c.nombre}</h4>
+              <span class="text-[9px] bg-rose-100 text-rose-700 font-bold px-1.5 py-0.5 rounded">Mi Cliente</span>
+            </div>
+            <p class="text-[11px] text-slate-500 font-medium"><i class="fas fa-envelope text-slate-400 mr-1"></i>${c.correo}</p>
+            <p class="text-[11px] text-slate-500"><i class="fas fa-map-marker-alt text-slate-400 mr-1"></i>${c.direccion || 'Sin dirección'}</p>
+            <p class="text-[11px] text-slate-500"><i class="fas fa-user-tie text-slate-400 mr-1"></i>${c.cargoContacto || 'Sin representante'}</p>
+          </div>
+          <button onclick="seleccionarClienteYRedactar(${originalIndex})" class="mt-3 w-full py-1.5 bg-slate-900 hover:bg-rose-600 text-white rounded-lg text-[11px] font-bold transition-all">
+            Redactar Acta <i class="fas fa-arrow-right ml-1"></i>
+          </button>
+        </div>
+      `;
+      }).join('');
+    }
+
+    function renderizarDirectorio(filtro = '') {
+      const cont = document.getElementById('lista-directorio');
+      const miUsuario = sessionUser ? sessionUser.nombre : '';
+      
+      // Filtrar lista por usuario actual y búsqueda de texto
+      const list = dbClientes
+        .filter(c => !c.usuarioActual || c.usuarioActual === miUsuario)
+        .filter(c => c.nombre.toLowerCase().includes(filtro.toLowerCase()));
+
+      if (list.length === 0) {
+        cont.innerHTML = '<div class="col-span-2 text-center py-8 text-slate-400 text-xs">No tienes entidades registradas asociadas a tu usuario.</div>';
         return;
       }
 
@@ -1070,7 +1120,7 @@ function generarHTMLActa(d) {
           <div>
             <div class="flex justify-between items-start mb-1">
               <h4 class="font-bold text-slate-900 text-xs leading-tight">${c.nombre}</h4>
-              <span class="text-[9px] bg-rose-100 text-rose-700 font-bold px-1.5 py-0.5 rounded">Cliente</span>
+              <span class="text-[9px] bg-rose-100 text-rose-700 font-bold px-1.5 py-0.5 rounded">Mi Cliente</span>
             </div>
             <p class="text-[11px] text-slate-500 font-medium"><i class="fas fa-envelope text-slate-400 mr-1"></i>${c.correo}</p>
             <p class="text-[11px] text-slate-500"><i class="fas fa-map-marker-alt text-slate-400 mr-1"></i>${c.direccion || 'Sin dirección'}</p>
