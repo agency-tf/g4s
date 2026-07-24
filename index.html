@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Plataforma Operativa G4S - Control de Actas</title>
   
-  <!-- Configuración PWA y Metatags Móviles / Windows -->
   <meta name="theme-color" content="#090D16">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,13 +17,9 @@
   <!-- Manifest PWA dinámico embebido -->
   <link rel="manifest" id="pwa-manifest">
 
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Google Fonts: Inter & Outfit -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-  <!-- html2pdf.js para renderizado e impresión directa de PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <script>
@@ -92,7 +87,6 @@
 </head>
 <body class="text-slate-800 bg-slate-900 min-h-full flex flex-col antialiased selection:bg-rose-600 selection:text-white">
 
-  <!-- Toast Notification System -->
   <div id="toast" class="fixed top-5 right-5 z-50 transform -translate-y-24 opacity-0 transition-all duration-300 px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 text-white text-sm font-bold pointer-events-none">
     <i id="toastIcon" class="fas text-lg"></i>
     <span id="toastMessage"></span>
@@ -104,7 +98,7 @@
 
     <div class="glass-login p-8 sm:p-10 rounded-3xl shadow-2xl w-full max-w-md relative z-10 border border-slate-700/60 transition-all">
       <div class="text-center mb-6">
-        <div class="inline-flex p-3.5 bg-white/10 rounded-2xl border border-white/20 mb-4 shadow-xl backdrop-blur-md">
+        <div class="inline-flex p-3.5 bg-white rounded-2xl border border-white/20 mb-4 shadow-xl">
           <img src="https://lagardservice.com.ec/wp-content/uploads/2015/02/G4S.svg-1.png" 
                alt="G4S Logo" 
                class="h-12 w-auto object-contain mx-auto filter drop-shadow-md"
@@ -114,7 +108,6 @@
         <p class="text-xs text-slate-400 font-medium mt-1">Control de Minutas y Actas Oficiales de Reunión</p>
       </div>
 
-      <!-- Banner rápido de instalación PWA en login -->
       <div id="pwa-install-banner-login" class="mb-5 p-3 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center justify-between gap-3 text-xs text-slate-300">
         <div class="flex items-center gap-2.5">
           <div class="p-2 bg-rose-600/20 text-rose-400 rounded-lg"><i class="fas fa-desktop text-sm"></i></div>
@@ -177,7 +170,6 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <!-- Botón de instalación PWA en barra superior -->
           <button type="button" id="btn-pwa-nav" onclick="dispararInstalacionPWA()" class="bg-slate-800 hover:bg-slate-700 text-rose-400 px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-700">
             <i class="fas fa-download text-xs"></i>
             <span class="hidden md:inline">Instalar App</span>
@@ -191,7 +183,6 @@
       </div>
     </nav>
 
-    <!-- Navigation Tabs -->
     <div class="bg-slate-900 border-b border-slate-800 shadow-inner">
       <div class="max-w-7xl mx-auto flex gap-2 p-2 overflow-x-auto hide-scrollbar">
         <button onclick="cambiarTab('tab-clientes')" id="btn-tab-clientes" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-bold bg-rose-600 text-white transition-all flex items-center gap-2 whitespace-nowrap shadow-sm">
@@ -208,7 +199,7 @@
 
     <main class="max-w-7xl mx-auto w-full p-4 sm:p-6 flex-1">
       
-      <!-- TAB 1: REGISTRO DE CLIENTE Y DIRECTORIO PRIVADO -->
+      <!-- TAB 1: CLIENTES -->
       <div id="tab-clientes" class="tab-content">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 lg:col-span-1 h-fit">
@@ -270,7 +261,6 @@
         </div>
       </div>
 
-      <!-- TAB 2: REDACCION DE ACTA -->
       <div id="tab-actas" class="tab-content hidden">
         <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
           <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6 flex-wrap gap-3">
@@ -378,7 +368,6 @@
         </div>
       </div>
 
-      <!-- TAB 3: AUDITORIA DE HISTORIAL -->
       <div id="tab-historial" class="tab-content hidden">
         <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
           <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center flex-wrap gap-2">
@@ -452,7 +441,7 @@
 
       <div class="p-4 sm:p-8 overflow-y-auto bg-slate-900/50 flex-1">
         <div id="pdf-container" class="pdf-page text-slate-800 font-sans relative">
-          <!-- Central Watermark for PDF rendering (Visible, 8% opacity) -->
+          <!-- Central Watermark for PDF rendering -->
           <div style="position: absolute; top: 220px; left: 0; right: 0; text-align: center; opacity: 0.08; pointer-events: none; z-index: 0;">
             <img src="https://lagardservice.com.ec/wp-content/uploads/2015/02/G4S.svg-1.png" style="width: 450px; display: inline-block;">
           </div>
@@ -531,7 +520,6 @@
             </div>
           </div>
 
-          <!-- Signatures Section -->
           <div class="mt-14 relative z-10">
             <div class="grid grid-cols-2 gap-8">
               <div class="border border-slate-300 rounded-xl p-4 text-center bg-white">
@@ -556,7 +544,6 @@
     </div>
   </div>
 
-  <!-- PWA Install Modal -->
   <div id="modal-instalacion" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 text-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
       <button onclick="cerrarModalInstalacion()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg p-2">
@@ -607,7 +594,8 @@
   </div>
 
   <script>
-    const APP_URL = "https://script.google.com/macros/s/AKfycbzPfYE6NJn6sYXdfltWSR53GwyxP6L4uqyhpG40INZPbyJZwkxQUtRFYOVkbT07Rr-9iQ/exec";
+    // URL DE LA APP GOOGLE APPS SCRIPT
+    const APP_URL = "https://script.google.com/macros/s/AKfycbx_7cgr1j6cJvWebFW-OKohmkR9GX6zsy3vU-E7zCTDMZ6z__tCTp5CgTpn8xdODQATRw/exec";
     
     let sessionUser = null; 
     let dbClientes = []; 
@@ -994,7 +982,6 @@
     }
 
     function mostrarVistaPreviaPDF(data) {
-      // Limpiar formato de fecha si viene en string largo o vacio
       let fechaLimpia = data.fecha || new Date().toISOString().split('T')[0];
       if (fechaLimpia.includes('GMT') || fechaLimpia.includes('T')) {
         const dObj = new Date(fechaLimpia);
@@ -1015,8 +1002,6 @@
       document.getElementById('pv-sig-name-cli').innerText = data.asistentesCliente || "---";
       document.getElementById('pv-sig-role-cli').innerText = `${data.cargoCliente ? data.cargoCliente + ' • ' : ''}${data.clienteNombre || ''}`;
       document.getElementById('pv-sig-name-g4s').innerText = data.asistentesG4S || "---";
-      
-      // Requerimiento exacto: Unicamente la palabra "G4S" debajo de la firma de G4S
       document.getElementById('pv-sig-role-g4s').innerText = "G4S";
 
       document.getElementById('modal-preview').classList.remove('hidden');
@@ -1116,7 +1101,6 @@
       tbody.innerHTML = filt.map(h => {
         const originalIndex = dbHistorial.indexOf(h);
         
-        // Limpieza de formato visual para fecha corta
         let fechaMostrar = h.fecha || '---';
         if (fechaMostrar.includes('GMT') || fechaMostrar.includes('T')) {
           const dObj = new Date(fechaMostrar);
