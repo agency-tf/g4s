@@ -2,16 +2,29 @@
 <html lang="es" class="h-full bg-slate-950">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Plataforma Operativa G4S - Control de Actas</title>
   
+  <!-- Configuración PWA y Metatags Móviles / Windows -->
+  <meta name="theme-color" content="#090D16">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="G4S Actas">
+  <meta name="application-name" content="G4S Actas">
+  <meta name="msapplication-TileColor" content="#e11d48">
+  <link rel="apple-touch-icon" href="https://lagardservice.com.ec/wp-content/uploads/2015/02/G4S.svg-1.png">
+
+  <!-- Manifest PWA dinámico embebido -->
+  <link rel="manifest" id="pwa-manifest">
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Google Fonts: Inter & Outfit -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-  <!-- html2pdf.js for client-side PDF rendering & instant preview -->
+  <!-- html2pdf.js para renderizado e impresión directa de PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <script>
@@ -39,7 +52,6 @@
   <style>
     body { font-family: 'Inter', sans-serif; }
     
-    /* Subtle background grid pattern for login */
     .bg-grid-pattern {
       background-image: radial-gradient(rgba(225, 29, 72, 0.15) 1px, transparent 1px), radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
       background-size: 32px 32px;
@@ -47,10 +59,10 @@
     }
 
     .glass-login {
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 23, 42, 0.85);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.12);
     }
 
     .hide-scrollbar::-webkit-scrollbar { display: none; }
@@ -71,7 +83,6 @@
       line-height: 1.45;
     }
 
-    /* Print media query override */
     @media print {
       body { background: white; margin: 0; padding: 0; }
       .no-print { display: none !important; }
@@ -87,18 +98,13 @@
     <span id="toastMessage"></span>
   </div>
 
-  <!-- PANTALLA LOGIN MEJORADA -->
   <div id="pantalla-login" class="flex-1 flex items-center justify-center p-4 min-h-screen relative overflow-hidden bg-grid-pattern">
-    
-    <!-- Ambient glow circles -->
     <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-rose-600/20 rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute bottom-10 right-10 w-80 h-80 bg-rose-900/15 rounded-full blur-3xl pointer-events-none"></div>
 
     <div class="glass-login p-8 sm:p-10 rounded-3xl shadow-2xl w-full max-w-md relative z-10 border border-slate-700/60 transition-all">
-      
-      <!-- Logo Header -->
-      <div class="text-center mb-8">
-        <div class="inline-flex p-3 bg-white/5 rounded-2xl border border-white/10 mb-4 shadow-xl backdrop-blur-md">
+      <div class="text-center mb-6">
+        <div class="inline-flex p-3.5 bg-white/10 rounded-2xl border border-white/20 mb-4 shadow-xl backdrop-blur-md">
           <img src="https://lagardservice.com.ec/wp-content/uploads/2015/02/G4S.svg-1.png" 
                alt="G4S Logo" 
                class="h-12 w-auto object-contain mx-auto filter drop-shadow-md"
@@ -108,14 +114,27 @@
         <p class="text-xs text-slate-400 font-medium mt-1">Control de Minutas y Actas Oficiales de Reunión</p>
       </div>
 
-      <!-- Formulario Login -->
+      <!-- Banner rápido de instalación PWA en login -->
+      <div id="pwa-install-banner-login" class="mb-5 p-3 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center justify-between gap-3 text-xs text-slate-300">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 bg-rose-600/20 text-rose-400 rounded-lg"><i class="fas fa-desktop text-sm"></i></div>
+          <div>
+            <p class="font-bold text-white text-[11px]">Instalar en Windows / Móvil</p>
+            <p class="text-[10px] text-slate-400">Acceso directo sin navegador</p>
+          </div>
+        </div>
+        <button type="button" onclick="dispararInstalacionPWA()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg text-[10px] transition-all flex items-center gap-1 shadow">
+          <i class="fas fa-download"></i> Instalar
+        </button>
+      </div>
+
       <form id="form-login" onsubmit="ejecutarLogin(event)" class="space-y-4">
         <div>
           <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-1.5 ml-1">Usuario / ID de Agente</label>
           <div class="relative">
             <i class="fas fa-shield-cat absolute left-4 top-3.5 text-slate-400 text-sm"></i>
-            <input type="text" id="login-user" required placeholder="Ej: admin_g4s" autocomplete="username" 
-                   class="w-full pl-11 pr-4 py-3 bg-slate-900/80 border border-slate-700 text-white rounded-xl outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all font-semibold text-sm placeholder-slate-500">
+            <input type="text" id="login-user" required placeholder="Ingrese su usuario" autocomplete="username" 
+                   class="w-full pl-11 pr-4 py-3 bg-slate-900/90 border border-slate-700 text-white rounded-xl outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all font-semibold text-sm placeholder-slate-500">
           </div>
         </div>
 
@@ -124,7 +143,7 @@
           <div class="relative">
             <i class="fas fa-key absolute left-4 top-3.5 text-slate-400 text-sm"></i>
             <input type="password" id="login-pass" required placeholder="••••••••" autocomplete="current-password" 
-                   class="w-full pl-11 pr-4 py-3 bg-slate-900/80 border border-slate-700 text-white rounded-xl outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all font-semibold text-sm placeholder-slate-500">
+                   class="w-full pl-11 pr-4 py-3 bg-slate-900/90 border border-slate-700 text-white rounded-xl outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all font-semibold text-sm placeholder-slate-500">
           </div>
         </div>
 
@@ -135,22 +154,13 @@
         </button>
       </form>
 
-      <!-- Badge de Seguridad e Info Demo -->
-      <div class="mt-8 pt-5 border-t border-slate-800 text-center space-y-3">
-        <div class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-[10px] font-bold">
-          <i class="fas fa-lock"></i>
-          <span>Conexión Encriptada • SSL Security</span>
-        </div>
-        <p class="text-[11px] text-slate-400">Acceso rápido local: <span class="text-white font-bold">admin</span> / <span class="text-white font-bold">1234</span></p>
+      <div class="mt-6 pt-4 border-t border-slate-800 text-center">
+        <p class="text-[11px] text-slate-400">Acceso institucional seguro G4S Ecuador</p>
       </div>
-
     </div>
   </div>
 
-  <!-- PANTALLA APLICACIÓN -->
   <div id="pantalla-app" class="hidden flex-1 flex flex-col min-h-screen bg-slate-100">
-    
-    <!-- Top Header Navbar -->
     <nav class="bg-slate-950 text-white p-3.5 shadow-xl sticky top-0 z-30 border-b border-slate-800">
       <div class="max-w-7xl mx-auto flex justify-between items-center">
         <div class="flex items-center gap-3">
@@ -167,11 +177,12 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <!-- Botón Conexión Google Ocultado -->
-          <button onclick="abrirConfiguracionURL()" title="Configurar Enlace Apps Script / Google Sheet" class="hidden bg-slate-900 hover:bg-slate-800 text-slate-300 px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border border-slate-800">
-            <i class="fas fa-link text-rose-500"></i>
-            <span class="hidden md:inline">Conexión Google</span>
+          <!-- Botón de instalación PWA en barra superior -->
+          <button type="button" id="btn-pwa-nav" onclick="dispararInstalacionPWA()" class="bg-slate-800 hover:bg-slate-700 text-rose-400 px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-700">
+            <i class="fas fa-download text-xs"></i>
+            <span class="hidden md:inline">Instalar App</span>
           </button>
+
           <button onclick="cerrarSesion()" class="bg-rose-600/10 hover:bg-rose-600 text-rose-400 hover:text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border border-rose-500/20">
             <i class="fas fa-power-off"></i>
             <span class="hidden sm:inline">Salir</span>
@@ -180,7 +191,7 @@
       </div>
     </nav>
 
-    <!-- Sub Navigation Tabs -->
+    <!-- Navigation Tabs -->
     <div class="bg-slate-900 border-b border-slate-800 shadow-inner">
       <div class="max-w-7xl mx-auto flex gap-2 p-2 overflow-x-auto hide-scrollbar">
         <button onclick="cambiarTab('tab-clientes')" id="btn-tab-clientes" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-bold bg-rose-600 text-white transition-all flex items-center gap-2 whitespace-nowrap shadow-sm">
@@ -192,65 +203,57 @@
         <button onclick="cambiarTab('tab-historial')" id="btn-tab-historial" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition-all flex items-center gap-2 whitespace-nowrap">
           <i class="fas fa-folder-open"></i> Auditoría e Historial
         </button>
-        <!-- Pestaña Apps Script Ocultada -->
-        <button onclick="cambiarTab('tab-script')" id="btn-tab-script" class="hidden tab-btn px-4 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition-all flex items-center gap-2 whitespace-nowrap ml-auto">
-          <i class="fas fa-code text-amber-400"></i> Código Apps Script
-        </button>
       </div>
     </div>
 
-    <!-- Main Content Area -->
     <main class="max-w-7xl mx-auto w-full p-4 sm:p-6 flex-1">
       
-      <!-- TAB 1: REGISTRO DE CLIENTE Y DIRECTORIO -->
+      <!-- TAB 1: REGISTRO DE CLIENTE Y DIRECTORIO PRIVADO -->
       <div id="tab-clientes" class="tab-content">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          <!-- Form Guardar Cliente -->
           <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 lg:col-span-1 h-fit">
             <div class="border-b border-slate-100 pb-3 mb-4">
               <h2 class="text-lg font-black text-slate-800 flex items-center gap-2 font-display">
                 <i class="fas fa-building text-rose-600"></i> Registrar Entidad
               </h2>
-              <p class="text-xs text-slate-400">Agrega un cliente para utilizarlo inmediatamente en las actas.</p>
+              <p class="text-xs text-slate-400">Agrega un cliente propio para usarlo en tus actas.</p>
             </div>
             
             <form id="form-cliente" onsubmit="registrarCliente(event)" class="space-y-3.5">
               <div>
                 <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Nombre Entidad / Empresa *</label>
-                <input type="text" id="cli-nombre" required placeholder="Ej: Grupo Oriental S.A." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 focus:bg-white text-sm font-semibold transition-all">
+                <input type="text" id="cli-nombre" required placeholder="Nombre de la empresa o entidad" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 focus:bg-white text-sm font-semibold transition-all">
               </div>
               <div>
                 <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Correo Electrónico Notificación *</label>
-                <input type="email" id="cli-correo" required placeholder="ejemplo@oriental.com" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 focus:bg-white text-sm font-semibold transition-all">
+                <input type="email" id="cli-correo" required placeholder="correo@empresa.com" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 focus:bg-white text-sm font-semibold transition-all">
               </div>
               <div>
                 <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Dirección Física</label>
-                <input type="text" id="cli-direccion" placeholder="Ej: Vía Crucita Km 2.5" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 focus:bg-white text-sm font-medium transition-all">
+                <input type="text" id="cli-direccion" placeholder="Dirección del establecimiento" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 focus:bg-white text-sm font-medium transition-all">
               </div>
               <div>
                 <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Teléfono de Contacto</label>
-                <input type="text" id="cli-telefono" placeholder="Ej: 0991234567" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 focus:bg-white text-sm font-medium transition-all">
+                <input type="text" id="cli-telefono" placeholder="Número telefónico" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 focus:bg-white text-sm font-medium transition-all">
               </div>
               <div>
                 <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Representante del Cliente y Cargo</label>
-                <input type="text" id="cli-cargo" placeholder="Ej: Ing. Karen Cedeño - Jefe de Agencia" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 focus:bg-white text-sm font-medium transition-all">
+                <input type="text" id="cli-cargo" placeholder="Nombre - Cargo del contacto" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 focus:bg-white text-sm font-medium transition-all">
               </div>
 
               <button type="submit" id="btn-cliente" class="w-full py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-rose-600 transition-all shadow-md flex items-center justify-center gap-2 text-sm mt-2">
-                <i class="fas fa-save"></i> <span>Guardar Entidad</span>
+                <i class="fas fa-save"></i> <span>Guardar Mi Entidad</span>
               </button>
             </form>
           </div>
 
-          <!-- Directorio / Lista de Clientes -->
           <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 lg:col-span-2">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4 flex-wrap gap-2">
               <div>
                 <h2 class="text-lg font-black text-slate-800 flex items-center gap-2 font-display">
-                  <i class="fas fa-users text-rose-600"></i> Directorio de Clientes
+                  <i class="fas fa-users text-rose-600"></i> Mis Clientes Registrados
                 </h2>
-                <p class="text-xs text-slate-400">Haz clic en redactar para asociar el cliente directamente al formulario.</p>
+                <p class="text-xs text-slate-400">Entidades asignadas exclusivamente a tu usuario.</p>
               </div>
               <div class="flex items-center gap-2">
                 <input type="text" id="buscar-directorio" oninput="filtrarDirectorio()" placeholder="Buscar cliente..." class="p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-rose-500 w-40 sm:w-52">
@@ -260,15 +263,14 @@
 
             <div id="lista-directorio" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[500px] overflow-y-auto pr-1">
               <div class="col-span-2 text-center py-10 text-slate-400 text-sm">
-                <i class="fas fa-spinner fa-spin text-2xl text-rose-600 mb-2"></i><br>Cargando directorio de clientes...
+                <i class="fas fa-spinner fa-spin text-2xl text-rose-600 mb-2"></i><br>Cargando tus clientes...
               </div>
             </div>
           </div>
-
         </div>
       </div>
 
-      <!-- TAB 2: REDACTAR Y EMITIR ACTA -->
+      <!-- TAB 2: REDACCION DE ACTA -->
       <div id="tab-actas" class="tab-content hidden">
         <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
           <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6 flex-wrap gap-3">
@@ -276,89 +278,81 @@
               <h2 class="text-xl font-black text-slate-800 flex items-center gap-2 font-display">
                 <i class="fas fa-file-contract text-rose-600"></i> Emitir Acta Oficial de Reunión
               </h2>
-              <p class="text-xs text-slate-400 mt-0.5">Formato rediseñado con el logo original de G4S y alta calidad visual.</p>
+              <p class="text-xs text-slate-400 mt-0.5">Generación con formato institucional A4 y firma oficial G4S.</p>
             </div>
             <button type="button" onclick="generarVistaPreviaPDF()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border border-slate-300 shadow-sm">
-              <i class="fas fa-eye text-rose-600"></i> Vista Previa del PDF
+              <i class="fas fa-eye text-rose-600"></i> Vista Previa PDF
             </button>
           </div>
 
           <form id="form-acta" onsubmit="generarActa(event)" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
-            <!-- Columna Izquierda: Datos Generales y Cliente -->
             <div class="space-y-4">
               <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3">
                 <span class="text-[10px] font-black uppercase tracking-widest text-rose-600 block">1. Entidad & Ubicación</span>
                 
                 <div>
-                  <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Seleccionar Cliente Registrado *</label>
+                  <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Seleccionar Mi Cliente *</label>
                   <select id="act-cliente" onchange="autoCompletarCliente()" required class="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-rose-500">
-                    <option value="">Cargando clientes...</option>
+                    <option value="">Cargando mis clientes...</option>
                   </select>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                   <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Fecha de la Reunión</label>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Fecha de Reunión</label>
                     <input type="date" id="act-fecha" required class="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-rose-500">
                   </div>
                   <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ciudad</label>
-                    <input type="text" id="act-ciudad" required placeholder="Portoviejo" class="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-rose-500">
+                    <input type="text" id="act-ciudad" required placeholder="Ciudad" class="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-rose-500">
                   </div>
                 </div>
 
                 <div>
                   <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Lugar / Dirección Física</label>
-                  <input type="text" id="act-direccion" required placeholder="Ej: Vía Crucita Km 2.5" class="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:border-rose-500">
+                  <input type="text" id="act-direccion" required placeholder="Lugar o dirección de la reunión" class="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:border-rose-500">
                 </div>
               </div>
 
-              <!-- Participantes Cliente -->
               <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3">
                 <span class="text-[10px] font-black uppercase tracking-widest text-slate-600 block">2. Representante por el Cliente</span>
-                
                 <div class="grid grid-cols-2 gap-3">
                   <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Asistente Cliente</label>
-                    <input type="text" id="act-asist-cli" required placeholder="Ing. Karen Cedeño" class="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-rose-500">
+                    <input type="text" id="act-asist-cli" required placeholder="Nombre de asistente cliente" class="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-rose-500">
                   </div>
                   <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Cargo Cliente</label>
-                    <input type="text" id="act-cargo-cli" required placeholder="Jefe de Agencia" class="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-rose-500">
+                    <input type="text" id="act-cargo-cli" required placeholder="Cargo en la entidad" class="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-rose-500">
                   </div>
                 </div>
               </div>
 
-              <!-- Participantes G4S -->
               <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3">
-                <span class="text-[10px] font-black uppercase tracking-widest text-rose-600 block">3. Representante por G4S Operativo</span>
-                
+                <span class="text-[10px] font-black uppercase tracking-widest text-rose-600 block">3. Representante por G4S</span>
                 <div class="grid grid-cols-2 gap-3">
                   <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Asistente G4S</label>
-                    <input type="text" id="act-asist-g4s" required placeholder="Ing. Gabriela Molina" class="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-rose-500">
+                    <input type="text" id="act-asist-g4s" required placeholder="Nombre de emisor G4S" class="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-rose-500">
                   </div>
                   <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Cargo G4S</label>
-                    <input type="text" id="act-cargo-g4s" required placeholder="Jefe de Agencia / Supervisor" class="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-rose-500">
+                    <input type="text" id="act-cargo-g4s" required placeholder="Cargo interno" class="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-rose-500">
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Columna Derecha: Temas Tratados y Conclusiones -->
             <div class="space-y-4 flex flex-col justify-between">
-              
               <div class="space-y-4">
                 <div>
-                  <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Temas Tratados en la Reunión *</label>
-                  <textarea id="act-temas" required rows="4" placeholder="• Novedades con el personal&#10;• Novedades con el servicio&#10;• Cumplimiento de consignas" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:border-rose-500 focus:bg-white resize-none"></textarea>
+                  <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Temas Tratados en Agenda *</label>
+                  <textarea id="act-temas" required rows="4" placeholder="• Ingrese los puntos o agenda tratada..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:border-rose-500 focus:bg-white resize-none"></textarea>
                 </div>
 
                 <div>
-                  <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Conclusiones y Acuerdos Alcanzados *</label>
-                  <textarea id="act-conclusiones" required rows="4" placeholder="Cliente indica personal y servicio sin novedad. Se acuerda mantener la operatividad..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:border-rose-500 focus:bg-white resize-none"></textarea>
+                  <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Conclusiones y Acuerdos *</label>
+                  <textarea id="act-conclusiones" required rows="4" placeholder="Ingrese las conclusiones y compromisos acordados..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:border-rose-500 focus:bg-white resize-none"></textarea>
                 </div>
 
                 <input type="hidden" id="act-correo-cli">
@@ -374,35 +368,31 @@
                   <button type="button" onclick="generarVistaPreviaPDF()" class="w-1/3 py-3.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl font-bold transition-all text-xs flex justify-center items-center gap-1.5">
                     <i class="fas fa-search"></i> Previsualizar
                   </button>
-                  
                   <button type="submit" id="btn-acta" class="w-2/3 py-3.5 bg-rose-600 text-white rounded-xl font-black hover:bg-rose-700 shadow-lg shadow-rose-600/20 transition-all text-sm flex justify-center items-center gap-2">
                     <i class="fas fa-paper-plane"></i> <span>Emitir y Enviar Acta</span>
                   </button>
                 </div>
               </div>
-
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
       </div>
 
-      <!-- TAB 3: HISTORIAL DE ACTAS -->
+      <!-- TAB 3: AUDITORIA DE HISTORIAL -->
       <div id="tab-historial" class="tab-content hidden">
         <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-          
           <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center flex-wrap gap-2">
             <div>
               <h2 class="text-base font-black text-slate-800 flex items-center gap-2 font-display">
-                <i class="fas fa-search text-rose-600"></i> Auditoría de Actas Emitidas
+                <i class="fas fa-search text-rose-600"></i> Auditoría de Mis Actas Emitidas
               </h2>
-              <p class="text-xs text-slate-400">Consulta y búsqueda de registros históricos guardados en el sistema.</p>
+              <p class="text-xs text-slate-400">Consulta de tus minutas guardadas en el sistema.</p>
             </div>
             <button onclick="cargarHistorial()" class="text-slate-700 hover:text-rose-600 text-xs font-bold flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-2 rounded-xl shadow-sm">
               <i class="fas fa-sync-alt"></i> Actualizar
             </button>
           </div>
 
-          <!-- Filtros de fecha y búsqueda -->
           <div class="p-4 bg-slate-50/50 border-b border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label class="block text-[10px] font-black uppercase text-slate-400 mb-1 ml-1">Fecha Desde</label>
@@ -414,11 +404,10 @@
             </div>
             <div>
               <label class="block text-[10px] font-black uppercase text-slate-400 mb-1 ml-1">Cliente / Entidad</label>
-              <input type="text" id="filtro-cliente" oninput="aplicarFiltros()" placeholder="Buscar por cliente..." class="w-full p-2 bg-white border border-slate-200 rounded-xl text-xs outline-none focus:border-rose-500">
+              <input type="text" id="filtro-cliente" oninput="aplicarFiltros()" placeholder="Buscar..." class="w-full p-2 bg-white border border-slate-200 rounded-xl text-xs outline-none focus:border-rose-500">
             </div>
           </div>
 
-          <!-- Tabla de Resultados -->
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-[700px]">
               <thead class="bg-white border-b border-slate-200 text-[10px] font-black text-slate-400 uppercase tracking-wider">
@@ -432,287 +421,23 @@
                 </tr>
               </thead>
               <tbody id="tabla-historial" class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
-                <tr><td colspan="6" class="p-8 text-center text-slate-400">Presiona "Actualizar" para sincronizar la base de datos.</td></tr>
+                <tr><td colspan="6" class="p-8 text-center text-slate-400">Presiona "Actualizar" para sincronizar tus registros.</td></tr>
               </tbody>
             </table>
           </div>
-
         </div>
       </div>
-
-      <!-- TAB 4: CÓDIGO GOOGLE APPS SCRIPT -->
-      <div id="tab-script" class="tab-content hidden space-y-6">
-        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
-          <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
-            <div>
-              <h2 class="text-lg font-black text-slate-800 flex items-center gap-2 font-display">
-                <i class="fab fa-google-drive text-emerald-600"></i> Código Apps Script (Configuración Nuevo Correo)
-              </h2>
-              <p class="text-xs text-slate-400">Copia este código y pégalo en la ventana de Apps Script de tu nueva Hoja de Cálculo.</p>
-            </div>
-            <button onclick="copiarCodigoAppsScript()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2">
-              <i class="fas fa-copy"></i> Copiar Código Backend
-            </button>
-          </div>
-
-          <!-- Pasos de configuración rápida -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-              <div class="w-7 h-7 bg-emerald-600 text-white rounded-lg flex items-center justify-center font-black text-xs mb-2">1</div>
-              <h3 class="text-xs font-bold text-slate-800">Nueva Hoja de Cálculo</h3>
-              <p class="text-[11px] text-slate-500 mt-1">Ingresa a tu nueva cuenta de Google y crea una hoja de cálculo en blanco.</p>
-            </div>
-
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-              <div class="w-7 h-7 bg-emerald-600 text-white rounded-lg flex items-center justify-center font-black text-xs mb-2">2</div>
-              <h3 class="text-xs font-bold text-slate-800">Pegar en Apps Script</h3>
-              <p class="text-[11px] text-slate-500 mt-1">Abre <strong>Extensiones > Apps Script</strong>, borra todo y pega el código de abajo.</p>
-            </div>
-
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-              <div class="w-7 h-7 bg-emerald-600 text-white rounded-lg flex items-center justify-center font-black text-xs mb-2">3</div>
-              <h3 class="text-xs font-bold text-slate-800">Implementar Web App</h3>
-              <p class="text-[11px] text-slate-500 mt-1">Haz clic en <strong>Implementar > Nueva implementación</strong> (Ejecutar como: <i>Yo</i> / Acceso: <i>Cualquier persona</i>) y pega el enlace obtenido en esta web.</p>
-            </div>
-          </div>
-
-          <!-- Área de código -->
-          <div>
-            <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Código Completo (`Code.gs`)</label>
-            <textarea id="codigo-script" readonly class="w-full h-80 p-4 font-mono text-xs bg-slate-900 text-emerald-400 rounded-xl border border-slate-800 outline-none resize-y">
-// =========================================================================
-// GOOGLE APPS SCRIPT BACKEND (G4S GESTION OPERATIVA - AISLAMIENTO POR USUARIO)
-// =========================================================================
-
-function doPost(e) {
-  try {
-    var contents = JSON.parse(e.postData.contents);
-    var action = contents.action;
-    var data = contents.data;
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-
-    if (action === "login") {
-      return ContentService.createTextOutput(JSON.stringify({
-        success: true,
-        nombre: data.user,
-        cargo: "Jefe de Agencia Operativa",
-        correo: Session.getActiveUser().getEmail()
-      })).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    if (action === "guardarCliente") {
-      var sheet = ss.getSheetByName("Clientes");
-      if (!sheet) {
-        sheet = ss.insertSheet("Clientes");
-        sheet.appendRow(["Nombre", "Correo", "Direccion", "Telefono", "CargoContacto", "FechaRegistro", "UsuarioActual"]);
-      }
-      sheet.appendRow([data.nombre, data.correo, data.direccion, data.telefono, data.cargoContacto, new Date(), data.usuarioActual || ""]);
-      return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    if (action === "obtenerClientes") {
-      var sheet = ss.getSheetByName("Clientes");
-      var result = [];
-      if (sheet) {
-        var values = sheet.getDataRange().getValues();
-        for (var i = 1; i < values.length; i++) {
-          var clienteUser = values[i][6] || "";
-          // Aislamiento: Solo retoma clientes pertenecientes al usuario solicitante
-          if (!data.usuario || clienteUser === data.usuario || clienteUser === "") {
-            result.push({
-              nombre: values[i][0],
-              correo: values[i][1],
-              direccion: values[i][2],
-              telefono: values[i][3],
-              cargoContacto: values[i][4],
-              usuarioActual: clienteUser
-            });
-          }
-        }
-      }
-      return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    if (action === "crearActa") {
-      var idActa = "ACT-" + Math.floor(1000 + Math.random() * 9000);
-      data.id = idActa;
-
-      var sheetH = ss.getSheetByName("Historial");
-      if (!sheetH) {
-        sheetH = ss.insertSheet("Historial");
-        sheetH.appendRow(["ID", "Fecha", "Cliente", "Ciudad", "Lugar", "AsistCliente", "CargoCliente", "AsistG4S", "CargoG4S", "Temas", "Conclusiones", "Usuario"]);
-      }
-      sheetH.appendRow([idActa, data.fecha, data.clienteNombre, data.ciudad, data.direccion, data.asistentesCliente, data.cargoCliente, data.asistentesG4S, data.cargoG4S, data.temasTratados, data.conclusiones, data.usuarioNombre]);
-
-      var htmlTemplate = generarHTMLActa(data);
-      var blob = Utilities.newBlob(htmlTemplate, "text/html", "Acta_" + idActa + ".html").getAs("application/pdf");
-      blob.setName("Acta_Reunion_G4S_" + idActa + ".pdf");
-
-      if (data.clienteCorreo) {
-        MailApp.sendEmail({
-          to: data.clienteCorreo,
-          subject: "Acta Oficial de Reunión G4S - " + data.clienteNombre + " [" + idActa + "]",
-          body: "Estimado(a) " + data.asistentesCliente + ",\n\nAdjunto a este mensaje encontrará el Acta Oficial correspondiente a la reunión mantenida con G4S Operativo.\n\nAtentamente,\nEquipo de Operaciones G4S",
-          attachments: [blob]
-        });
-      }
-
-      var pdfBase64 = Utilities.base64Encode(blob.getBytes());
-
-      return ContentService.createTextOutput(JSON.stringify({
-        success: true,
-        id: idActa,
-        pdfBase64: pdfBase64
-      })).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    if (action === "obtenerHistorial") {
-      var sheetH = ss.getSheetByName("Historial");
-      var resultH = [];
-      if (sheetH) {
-        var valuesH = sheetH.getDataRange().getValues();
-        for (var j = 1; j < valuesH.length; j++) {
-          resultH.push({
-            id: valuesH[j][0],
-            fecha: valuesH[j][1],
-            cliente: valuesH[j][2],
-            ciudad: valuesH[j][3],
-            conclusiones: valuesH[j][10]
-          });
-        }
-      }
-      return ContentService.createTextOutput(JSON.stringify(resultH)).setMimeType(ContentService.MimeType.JSON);
-    }
-
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ success: false, message: err.toString() })).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function generarHTMLActa(d) {
-  return `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<style>
-  @page { size: A4; margin: 15mm; }
-  body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #0f172a; margin: 0; padding: 0; font-size: 10pt; line-height: 1.45; }
-  
-  .header-table { width: 100%; border-bottom: 3px solid #e11d48; padding-bottom: 12px; margin-bottom: 20px; border-collapse: collapse; }
-  .logo-img { height: 42px; width: auto; vertical-align: middle; }
-  .title-cell { text-align: center; vertical-align: middle; }
-  .title-text { font-size: 13pt; font-weight: 800; text-transform: uppercase; color: #0f172a; margin: 0; }
-  .subtitle-text { font-size: 8pt; color: #64748b; font-weight: bold; text-transform: uppercase; margin-top: 2px; }
-  .meta-cell { text-align: right; font-size: 8.5pt; color: #64748b; font-family: monospace; line-height: 1.3; vertical-align: middle; }
-  
-  .section-badge { font-size: 8pt; font-weight: 800; text-transform: uppercase; color: #e11d48; margin-top: 14px; margin-bottom: 6px; letter-spacing: 0.5px; }
-  
-  table.data-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-  table.data-table th { background-color: #f8fafc; border: 1px solid #cbd5e1; padding: 7px 10px; font-size: 8.5pt; text-align: left; color: #475569; width: 25%; text-transform: uppercase; font-weight: bold; }
-  table.data-table td { border: 1px solid #cbd5e1; padding: 7px 10px; font-size: 9.5pt; color: #0f172a; word-break: break-word; }
-  
-  .box-content { border: 1px solid #cbd5e1; background-color: #fafafa; border-radius: 6px; padding: 12px; font-size: 9.5pt; min-height: 70px; white-space: pre-wrap; line-height: 1.5; color: #1e293b; }
-  
-  .signatures { width: 100%; margin-top: 40px; border-collapse: collapse; page-break-inside: avoid; }
-  .signatures td { width: 50%; vertical-align: bottom; padding: 8px; }
-  .sig-card { border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; text-align: center; background-color: #ffffff; }
-  .sig-line { border-top: 1px solid #475569; width: 80%; margin: 42px auto 8px auto; }
-  .sig-name { font-weight: bold; font-size: 9.5pt; color: #0f172a; margin: 0; }
-  .sig-role { font-size: 8pt; color: #64748b; margin-top: 2px; }
-  
-  .footer { margin-top: 25px; text-align: center; font-size: 7.5pt; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 8px; }
-</style>
-</head>
-<body>
-  <table class="header-table">
-    <tr>
-      <td style="width: 25%;">
-        <img src="https://lagardservice.com.ec/wp-content/uploads/2015/02/G4S.svg-1.png" class="logo-img" alt="G4S Logo">
-      </td>
-      <td class="title-cell" style="width: 50%;">
-        <h1 class="title-text">Acta Oficial de Reunión</h1>
-        <div class="subtitle-text">Control e Inspección Operativa</div>
-      </td>
-      <td class="meta-cell" style="width: 25%;">
-        <strong>FECHA DE EMISIÓN:</strong><br>
-        ${d.fecha}
-      </td>
-    </tr>
-  </table>
-
-  <div class="section-badge">1. Información General de la Entidad</div>
-  <table class="data-table">
-    <tr>
-      <th>Cliente / Entidad</th>
-      <td><strong>${d.clienteNombre}</strong></td>
-      <th>Ciudad</th>
-      <td>${d.ciudad}</td>
-    </tr>
-    <tr>
-      <th>Lugar / Dirección</th>
-      <td colspan="3">${d.direccion}</td>
-    </tr>
-  </table>
-
-  <div class="section-badge">2. Participantes de la Reunión</div>
-  <table class="data-table">
-    <tr>
-      <th>Por el Cliente</th>
-      <td><strong>${d.asistentesCliente}</strong> &nbsp;<span style="color:#64748b; font-size:8.5pt;">(${d.cargoCliente})</span></td>
-    </tr>
-    <tr>
-      <th>Por G4S Operativo</th>
-      <td><strong>${d.asistentesG4S}</strong> &nbsp;<span style="color:#64748b; font-size:8.5pt;">(${d.cargoG4S})</span></td>
-    </tr>
-  </table>
-
-  <div class="section-badge">3. Temas Tratados en Agenda</div>
-  <div class="box-content">${d.temasTratados}</div>
-
-  <div class="section-badge">4. Conclusiones y Acuerdos Alcanzados</div>
-  <div class="box-content">${d.conclusiones}</div>
-
-  <table class="signatures">
-    <tr>
-      <td>
-        <div class="sig-card">
-          <div class="sig-line"></div>
-          <p class="sig-name">${d.asistentesCliente}</p>
-          <p class="sig-role">${d.cargoCliente} • ${d.clienteNombre}</p>
-        </div>
-      </td>
-      <td>
-        <div class="sig-card">
-          <div class="sig-line"></div>
-          <p class="sig-name">${d.asistentesG4S}</p>
-          <p class="sig-role">${d.cargoG4S} • G4S Operativo</p>
-        </div>
-      </td>
-    </tr>
-  </table>
-
-  <div class="footer">Documento Oficial generado automáticamente por la Plataforma Digital G4S</div>
-</body>
-</html>`;
-}</textarea>
-          </div>
-        </div>
-      </div>
-
     </main>
   </div>
 
-  <!-- MODAL VISTA PREVIA DEL PDF MEJORADO -->
   <div id="modal-preview" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
     <div class="bg-slate-900 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-slate-800">
-      
-      <!-- Modal Header -->
       <div class="p-4 bg-slate-950 border-b border-slate-800 flex justify-between items-center text-white">
         <div class="flex items-center gap-3">
           <img src="https://lagardservice.com.ec/wp-content/uploads/2015/02/G4S.svg-1.png" alt="G4S" class="h-6 w-auto bg-white p-1 rounded">
           <div>
             <h3 class="font-bold text-sm">Vista Previa del Acta Institucional (A4)</h3>
-            <p class="text-[10px] text-slate-400">Documento oficial listo para impresión y firmado</p>
+            <p class="text-[10px] text-slate-400">Documento oficial de reunión</p>
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -725,19 +450,15 @@ function generarHTMLActa(d) {
         </div>
       </div>
 
-      <!-- Modal Body / A4 Container -->
       <div class="p-4 sm:p-8 overflow-y-auto bg-slate-900/50 flex-1">
-        
-        <!-- Documento A4 Renderizado -->
         <div id="pdf-container" class="pdf-page text-slate-800 font-sans relative">
-          
-          <!-- Background Subtle Watermark -->
-          <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] overflow-hidden">
-            <img src="https://lagardservice.com.ec/wp-content/uploads/2015/02/G4S.svg-1.png" class="w-2/3 max-w-lg object-contain">
+          <!-- Central Watermark for PDF rendering (Visible, 8% opacity) -->
+          <div style="position: absolute; top: 220px; left: 0; right: 0; text-align: center; opacity: 0.08; pointer-events: none; z-index: 0;">
+            <img src="https://lagardservice.com.ec/wp-content/uploads/2015/02/G4S.svg-1.png" style="width: 450px; display: inline-block;">
           </div>
 
           <!-- Document Header Table -->
-          <div class="flex justify-between items-center border-b-2 border-rose-600 pb-4 mb-5">
+          <div class="flex justify-between items-center border-b-2 border-rose-600 pb-4 mb-5 relative z-10">
             <div class="w-1/4">
               <img src="https://lagardservice.com.ec/wp-content/uploads/2015/02/G4S.svg-1.png" 
                    alt="Logo G4S" 
@@ -750,152 +471,238 @@ function generarHTMLActa(d) {
             </div>
             <div class="text-right w-1/4 text-[9px] text-slate-500 font-mono leading-tight">
               <p><strong>FECHA EMISIÓN:</strong></p>
-              <p><span id="pv-fecha">25/06/2026</span></p>
+              <p><span id="pv-fecha">---</span></p>
             </div>
           </div>
 
           <!-- Section 1 -->
-          <div class="mb-4">
+          <div class="mb-4 relative z-10">
             <h4 class="text-[10px] font-black uppercase tracking-wider text-rose-600 mb-1.5 flex items-center gap-1.5">
               <i class="fas fa-building"></i> 1. Información General de la Entidad
             </h4>
             <table class="w-full text-xs border-collapse border border-slate-300">
               <tr class="border-b border-slate-300">
                 <td class="bg-slate-100 font-bold p-2 text-slate-600 w-1/4 uppercase text-[10px]">Cliente / Entidad</td>
-                <td class="p-2 font-black text-slate-900 text-sm" id="pv-cliente">Grupo Oriental S.A.</td>
+                <td class="p-2 font-black text-slate-900 text-sm" id="pv-cliente">---</td>
                 <td class="bg-slate-100 font-bold p-2 text-slate-600 w-1/6 uppercase text-[10px]">Ciudad</td>
-                <td class="p-2 font-semibold text-slate-800" id="pv-ciudad">Portoviejo</td>
+                <td class="p-2 font-semibold text-slate-800" id="pv-ciudad">---</td>
               </tr>
               <tr>
                 <td class="bg-slate-100 font-bold p-2 text-slate-600 uppercase text-[10px]">Lugar / Dirección</td>
-                <td colspan="3" class="p-2 text-slate-700" id="pv-direccion">Vía Crucita Km 2.5</td>
+                <td colspan="3" class="p-2 text-slate-700" id="pv-direccion">---</td>
               </tr>
             </table>
           </div>
 
           <!-- Section 2 -->
-          <div class="mb-4">
+          <div class="mb-4 relative z-10">
             <h4 class="text-[10px] font-black uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1.5">
               <i class="fas fa-users"></i> 2. Participantes de la Reunión
             </h4>
             <table class="w-full text-xs border-collapse border border-slate-300">
               <tr class="border-b border-slate-300">
                 <td class="bg-slate-100 font-bold p-2 text-slate-600 w-1/3 uppercase text-[10px]">Por el Cliente</td>
-                <td class="p-2 font-semibold text-slate-800" id="pv-asist-cli">Ing. Karen Cedeño <span class="text-slate-500 text-[10px]">(Jefe de Agencia)</span></td>
+                <td class="p-2 font-semibold text-slate-800" id="pv-asist-cli">---</td>
               </tr>
               <tr>
                 <td class="bg-slate-100 font-bold p-2 text-slate-600 uppercase text-[10px]">Por G4S Operativo</td>
-                <td class="p-2 font-semibold text-slate-800" id="pv-asist-g4s">Ing. Gabriela Molina <span class="text-slate-500 text-[10px]">(Jefe de Agencia)</span></td>
+                <td class="p-2 font-semibold text-slate-800" id="pv-asist-g4s">---</td>
               </tr>
             </table>
           </div>
 
           <!-- Section 3 -->
-          <div class="mb-4">
+          <div class="mb-4 relative z-10">
             <h4 class="text-[10px] font-black uppercase tracking-wider text-rose-600 mb-1.5 flex items-center gap-1.5">
               <i class="fas fa-list-check"></i> 3. Temas Tratados en Agenda
             </h4>
             <div class="border border-slate-300 bg-slate-50/70 rounded-lg p-3 text-xs leading-relaxed text-slate-800 whitespace-pre-line min-h-[75px]" id="pv-temas">
-              • Novedades con el personal
-              • Novedades con el servicio
-              • Cumplimiento de consignas
+              ---
             </div>
           </div>
 
           <!-- Section 4 -->
-          <div class="mb-6">
+          <div class="mb-6 relative z-10">
             <h4 class="text-[10px] font-black uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1.5">
               <i class="fas fa-check-circle"></i> 4. Conclusiones y Acuerdos Alcanzados
             </h4>
             <div class="border border-slate-300 bg-slate-50/70 rounded-lg p-3 text-xs leading-relaxed text-slate-800 whitespace-pre-line min-h-[75px]" id="pv-conclusiones">
-              Cliente indica personal y servicio sin novedad.
+              ---
             </div>
           </div>
 
-          <!-- Signatures -->
-          <div class="mt-14">
+          <!-- Signatures Section -->
+          <div class="mt-14 relative z-10">
             <div class="grid grid-cols-2 gap-8">
               <div class="border border-slate-300 rounded-xl p-4 text-center bg-white">
                 <div class="h-12 border-b border-slate-400 mb-2 w-4/5 mx-auto"></div>
-                <p class="font-bold text-xs text-slate-900" id="pv-sig-name-cli">Ing. Karen Cedeño</p>
-                <p class="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5" id="pv-sig-role-cli">Jefe de Agencia - Cliente</p>
+                <p class="font-bold text-xs text-slate-900" id="pv-sig-name-cli">---</p>
+                <p class="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5" id="pv-sig-role-cli">---</p>
               </div>
 
               <div class="border border-slate-300 rounded-xl p-4 text-center bg-white">
                 <div class="h-12 border-b border-slate-400 mb-2 w-4/5 mx-auto"></div>
-                <p class="font-bold text-xs text-slate-900" id="pv-sig-name-g4s">Ing. Gabriela Molina</p>
-                <p class="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5" id="pv-sig-role-g4s">Jefe de Agencia - G4S</p>
+                <p class="font-bold text-xs text-slate-900" id="pv-sig-name-g4s">---</p>
+                <p class="text-[10px] font-bold text-slate-700 uppercase tracking-wider mt-0.5" id="pv-sig-role-g4s">G4S</p>
               </div>
             </div>
           </div>
 
-          <!-- Footer -->
           <div class="absolute bottom-6 left-12 right-12 border-t border-slate-200 pt-3 text-center text-[9px] text-slate-400">
             Plataforma Digital de Actas Operativas G4S • Documento oficial con firmas de conformidad.
           </div>
-
         </div>
-
       </div>
     </div>
   </div>
 
-  <!-- MODAL CONFIGURACION APPS SCRIPT URL -->
-  <div id="modal-url" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-slate-200">
-      <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
-        <h3 class="font-black text-slate-900 text-lg flex items-center gap-2 font-display">
-          <i class="fas fa-link text-rose-600"></i> Enlace Web App de Google
-        </h3>
-        <button onclick="cerrarModalURL()" class="text-slate-400 hover:text-slate-700">
-          <i class="fas fa-times"></i>
-        </button>
+  <!-- PWA Install Modal -->
+  <div id="modal-instalacion" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 text-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+      <button onclick="cerrarModalInstalacion()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg p-2">
+        <i class="fas fa-times"></i>
+      </button>
+
+      <div class="text-center mb-6">
+        <div class="w-14 h-14 bg-rose-600/20 text-rose-500 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 border border-rose-500/30">
+          <i class="fas fa-mobile-screen-button"></i>
+        </div>
+        <h3 class="text-xl font-bold font-display">Instalar G4S Operaciones</h3>
+        <p class="text-xs text-slate-400 mt-1">Usa la aplicación como un programa nativo en tu dispositivo.</p>
       </div>
 
-      <p class="text-xs text-slate-500 mb-4 leading-relaxed">
-        Ingresa la URL de la Web App generada desde tu nueva cuenta de Google Sheets. El sistema enviará los correos y guardará las actas en tu propia cuenta.
-      </p>
+      <div class="space-y-4 text-xs text-slate-300">
+        <div class="p-3.5 bg-slate-800/80 rounded-2xl border border-slate-700/60">
+          <div class="flex items-center gap-2 font-bold text-white mb-1">
+            <i class="fab fa-windows text-rose-500"></i> Windows (Edge o Chrome)
+          </div>
+          <p class="text-slate-400 leading-relaxed">
+            Haz clic en <strong>"Instalar App"</strong> o presiona el ícono de instalación <i class="fas fa-download mx-0.5"></i> en la barra de direcciones.
+          </p>
+        </div>
 
-      <div class="space-y-3">
-        <label class="block text-[10px] font-black uppercase text-slate-400">URL del Web App (`macros/s/.../exec`)</label>
-        <input type="text" id="cfg-app-url" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono outline-none focus:border-rose-500">
-        
-        <div class="flex gap-2 pt-2">
-          <button onclick="guardarNuevoURL()" class="flex-1 py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition-all shadow-md">
-            Guardar URL
-          </button>
-          <button onclick="restablecerURLPredeterminada()" class="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-all">
-            Restablecer
-          </button>
+        <div class="p-3.5 bg-slate-800/80 rounded-2xl border border-slate-700/60">
+          <div class="flex items-center gap-2 font-bold text-white mb-1">
+            <i class="fab fa-android text-emerald-500"></i> Android (Chrome)
+          </div>
+          <p class="text-slate-400 leading-relaxed">
+            Presiona los 3 puntos <i class="fas fa-ellipsis-v mx-0.5"></i> y elige <strong>"Agregar a la pantalla principal"</strong>.
+          </p>
+        </div>
+
+        <div class="p-3.5 bg-slate-800/80 rounded-2xl border border-slate-700/60">
+          <div class="flex items-center gap-2 font-bold text-white mb-1">
+            <i class="fab fa-apple text-slate-200"></i> iPhone / iPad (Safari)
+          </div>
+          <p class="text-slate-400 leading-relaxed">
+            Toca Compartir <i class="fas fa-share-from-square mx-0.5 text-rose-400"></i> y elige <strong>"Agregar a inicio"</strong>.
+          </p>
         </div>
       </div>
+
+      <button onclick="cerrarModalInstalacion()" class="w-full mt-6 py-3 bg-rose-600 hover:bg-rose-500 font-bold rounded-xl text-xs uppercase tracking-wider transition-all">
+        Entendido
+      </button>
     </div>
   </div>
 
   <script>
-    // URL predeterminada
-    const DEFAULT_APP_URL = "https://script.google.com/macros/s/AKfycbxa8gQkztIRVGN9-jsPY3ab15gA0kKhuPlK3yz4C6rvJz1GmVxnykEbGBmkK5pTWqVAxQ/exec";
+    const APP_URL = "https://script.google.com/macros/s/AKfycbzPfYE6NJn6sYXdfltWSR53GwyxP6L4uqyhpG40INZPbyJZwkxQUtRFYOVkbT07Rr-9iQ/exec";
     
-    let APP_URL = localStorage.getItem('g4s_custom_url') || DEFAULT_APP_URL;
     let sessionUser = null; 
+    let dbClientes = []; 
+    let dbHistorial = [];
+    let deferredPrompt = null;
 
-    let dbClientes = [
-      { nombre: "Grupo Oriental S.A.", correo: "aportoviejo@gruporiental.com", direccion: "Vía Crucita Km 2.5", telefono: "0991234567", cargoContacto: "Ing. Karen Cedeño - Jefe de Agencia", usuarioActual: "admin" },
-      { nombre: "Corporación Favorita", correo: "contacto@cfavorita.com", direccion: "Av. Metropolitana", telefono: "0987654321", cargoContacto: "Lic. Roberto Vera - Administrador", usuarioActual: "usuario_demo" }
-    ]; 
+    /* PWA Manifest dinámico y Service Worker */
+    (function registrarManifestPWA() {
+      const manifestObj = {
+        "name": "Plataforma Operativa G4S",
+        "short_name": "G4S Actas",
+        "start_url": "./",
+        "display": "standalone",
+        "background_color": "#090D16",
+        "theme_color": "#e11d48",
+        "description": "Sistema de Gestión de Minutas y Actas Oficiales G4S",
+        "icons": [
+          {
+            "src": "https://lagardservice.com.ec/wp-content/uploads/2015/02/G4S.svg-1.png",
+            "sizes": "192x192 512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+          }
+        ]
+      };
+      const stringManifest = JSON.stringify(manifestObj);
+      const blob = new Blob([stringManifest], {type: 'application/json'});
+      const manifestUrl = URL.createObjectURL(blob);
+      const linkEl = document.getElementById('pwa-manifest');
+      if (linkEl) linkEl.setAttribute('href', manifestUrl);
+    })();
 
-    let dbHistorial = [
-      { id: "ACT-1082", fecha: "2026-06-25", cliente: "Grupo Oriental S.A.", ciudad: "Portoviejo", conclusiones: "Cliente indica personal y servicio sin novedad" }
-    ];
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        const swCode = `
+          self.addEventListener('install', (e) => { self.skipWaiting(); });
+          self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
+          self.addEventListener('fetch', (e) => { e.respondWith(fetch(e.request).catch(() => caches.match(e.request))); });
+        `;
+        const blob = new Blob([swCode], { type: 'text/javascript' });
+        navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(err => console.log('SW Note:', err));
+      });
+    }
+
+    // Capturar evento de instalación PWA
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const bannerLogin = document.getElementById('pwa-install-banner-login');
+      const btnNav = document.getElementById('btn-pwa-nav');
+      if (bannerLogin) bannerLogin.classList.remove('hidden');
+      if (btnNav) btnNav.classList.remove('hidden');
+    });
+
+    function dispararInstalacionPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            mostrarToast("Instalación aceptada correctamente", "success");
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        document.getElementById('modal-instalacion').classList.remove('hidden');
+      }
+    }
+
+    function cerrarModalInstalacion() {
+      document.getElementById('modal-instalacion').classList.add('hidden');
+    }
 
     window.onload = function() {
-      document.getElementById('cfg-app-url').value = APP_URL;
       const stored = sessionStorage.getItem('g4s_user');
       if (stored) { 
         sessionUser = JSON.parse(stored); 
         activarDashboard(); 
       }
     };
+
+    function mostrarToast(msg, tipo = 'success') {
+      const toast = document.getElementById('toast');
+      const msgEl = document.getElementById('toastMessage');
+      const iconEl = document.getElementById('toastIcon');
+      if (!toast || !msgEl || !iconEl) return;
+
+      msgEl.innerText = msg;
+      toast.className = `fixed top-5 right-5 z-50 transform px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 text-white text-sm font-bold transition-all duration-300 ${tipo === 'success' ? 'bg-emerald-600' : 'bg-rose-600'}`;
+      iconEl.className = tipo === 'success' ? 'fas fa-check-circle text-lg' : 'fas fa-exclamation-triangle text-lg';
+      
+      toast.classList.remove('-translate-y-24', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('-translate-y-24', 'opacity-0');
+      }, 4000);
+    }
 
     async function pushData(action, data) {
       try {
@@ -914,16 +721,15 @@ function generarHTMLActa(d) {
 
     function simularRespuestaLocal(action, data) {
       if (action === "login") {
-        return { success: true, nombre: data.user, cargo: "Jefe de Agencia Operativa", correo: "operaciones@g4s.com" };
+        return { success: true, nombre: data.user, cargo: "Jefe de Agencia Operativa", correo: data.user + "@g4s.com" };
       }
       if (action === "guardarCliente") {
         dbClientes.push(data);
         return { success: true };
       }
       if (action === "obtenerClientes") {
-        // Filtrado estricto: Solo devuelve los clientes creados por el usuario activo
-        const miUsuario = sessionUser ? sessionUser.nombre : (data.usuario || '');
-        return dbClientes.filter(c => c.usuarioActual === miUsuario);
+        const miUsuario = sessionUser ? sessionUser.nombre.trim().toLowerCase() : '';
+        return dbClientes.filter(c => (c.usuarioActual || '').trim().toLowerCase() === miUsuario);
       }
       if (action === "crearActa") {
         const newId = "ACT-" + Math.floor(1000 + Math.random() * 9000);
@@ -932,7 +738,14 @@ function generarHTMLActa(d) {
           fecha: data.fecha,
           cliente: data.clienteNombre,
           ciudad: data.ciudad,
-          conclusiones: data.conclusiones
+          direccion: data.direccion,
+          asistentesCliente: data.asistentesCliente,
+          cargoCliente: data.cargoCliente,
+          asistentesG4S: data.asistentesG4S,
+          cargoG4S: data.cargoG4S,
+          temas: data.temasTratados,
+          conclusiones: data.conclusiones,
+          usuarioEmisor: data.usuarioNombre
         });
         return { success: true, id: newId };
       }
@@ -942,35 +755,54 @@ function generarHTMLActa(d) {
       return { success: false, message: "Modo fuera de línea" };
     }
 
-    function mostrarToast(msg, tipo = 'success') {
-      const toast = document.getElementById('toast');
-      document.getElementById('toastMessage').innerText = msg;
-      toast.className = `fixed top-5 right-5 z-50 transform px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 text-white text-sm font-bold transition-all duration-300 ${tipo === 'success' ? 'bg-emerald-600' : 'bg-rose-600'}`;
-      document.getElementById('toastIcon').className = tipo === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
-      toast.classList.remove('-translate-y-24', 'opacity-0');
-      setTimeout(() => toast.classList.add('-translate-y-24', 'opacity-0'), 4000);
-    }
-
     async function ejecutarLogin(e) {
-      e.preventDefault();
-      const u = document.getElementById('login-user').value.trim();
-      const c = document.getElementById('login-pass').value.trim();
+      if (e) e.preventDefault();
+      
+      const userEl = document.getElementById('login-user');
+      const passEl = document.getElementById('login-pass');
       const btn = document.getElementById('btn-login');
 
+      if (!userEl || !passEl || !btn) return;
+
+      const u = userEl.value.trim();
+      const c = passEl.value.trim();
+
+      if (!u || !c) {
+        mostrarToast("Por favor ingresa usuario y contraseña", "error");
+        return;
+      }
+
       btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validando...';
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin text-xs mr-2"></i> Autenticando...';
 
-      const res = await pushData('login', { user: u, pass: c });
-      btn.disabled = false;
-      btn.innerHTML = '<span>Ingresar al Sistema</span> <i class="fas fa-arrow-right text-xs"></i>';
-
-      if (res.success) {
-        sessionUser = { nombre: res.nombre || u, cargo: res.cargo || "Jefe Operativo", correo: res.correo || "agente@g4s.com" };
+      try {
+        const res = await pushData('login', { user: u, pass: c });
+        if (res && res.success) {
+          sessionUser = {
+            nombre: res.nombre || u,
+            cargo: res.cargo || "Jefe de Agencia Operativa",
+            correo: res.correo || "operaciones@g4s.com",
+            usuarioID: u
+          };
+          sessionStorage.setItem('g4s_user', JSON.stringify(sessionUser));
+          activarDashboard();
+          mostrarToast("Bienvenido " + sessionUser.nombre, "success");
+        } else {
+          mostrarToast(res.message || "Credenciales incorrectas", "error");
+        }
+      } catch (err) {
+        sessionUser = {
+          nombre: u,
+          cargo: "Jefe de Agencia Operativa",
+          correo: u + "@g4s.com",
+          usuarioID: u
+        };
         sessionStorage.setItem('g4s_user', JSON.stringify(sessionUser));
         activarDashboard();
-        mostrarToast("Sesión iniciada como " + sessionUser.nombre, "success");
-      } else {
-        mostrarToast(res.message || "Credenciales inválidas", "error");
+        mostrarToast("Bienvenido " + sessionUser.nombre, "success");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Ingresar al Sistema</span> <i class="fas fa-arrow-right text-xs"></i>';
       }
     }
 
@@ -979,7 +811,6 @@ function generarHTMLActa(d) {
       document.getElementById('pantalla-app').classList.remove('hidden');
       document.getElementById('ui-username').innerText = sessionUser.nombre;
       cambiarTab('tab-clientes');
-      cargarClientesEnSelect();
     }
 
     function cerrarSesion() {
@@ -994,25 +825,31 @@ function generarHTMLActa(d) {
         el.classList.add('text-slate-300', 'hover:bg-slate-800');
       });
 
-      document.getElementById(id).classList.remove('hidden');
+      const tabEl = document.getElementById(id);
+      if (tabEl) tabEl.classList.remove('hidden');
+
       const btn = document.getElementById('btn-' + id);
-      btn.classList.remove('text-slate-300', 'hover:bg-slate-800');
-      btn.classList.add('bg-rose-600', 'text-white', 'shadow-sm');
+      if (btn) {
+        btn.classList.remove('text-slate-300', 'hover:bg-slate-800');
+        btn.classList.add('bg-rose-600', 'text-white', 'shadow-sm');
+      }
 
       if (id === 'tab-actas') {
         document.getElementById('act-fecha').value = new Date().toISOString().split('T')[0];
-        document.getElementById('act-asist-g4s').value = sessionUser.nombre || 'Ing. Gabriela Molina';
-        document.getElementById('act-cargo-g4s').value = sessionUser.cargo || 'Jefe de Agencia';
+        document.getElementById('act-asist-g4s').value = sessionUser ? sessionUser.nombre : '';
+        document.getElementById('act-cargo-g4s').value = sessionUser ? sessionUser.cargo : '';
         cargarClientesEnSelect();
       }
-
+      if (id === 'tab-clientes') {
+        cargarClientesEnSelect();
+      }
       if (id === 'tab-historial') {
         cargarHistorial();
       }
     }
 
     async function registrarCliente(e) {
-      e.preventDefault();
+      if (e) e.preventDefault();
       const btn = document.getElementById('btn-cliente');
       btn.disabled = true;
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
@@ -1028,12 +865,12 @@ function generarHTMLActa(d) {
 
       const res = await pushData('guardarCliente', data);
       btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-save"></i> <span>Guardar Entidad</span>';
+      btn.innerHTML = '<i class="fas fa-save"></i> <span>Guardar Mi Entidad</span>';
 
       if (res.success) {
-        mostrarToast("Entidad registrada correctamente", "success");
+        mostrarToast("Cliente registrado exitosamente en tu lista", "success");
         e.target.reset();
-        await cargarClientesEnSelect();
+        cargarClientesEnSelect();
       } else {
         mostrarToast("Error al guardar: " + res.message, "error");
       }
@@ -1041,10 +878,11 @@ function generarHTMLActa(d) {
 
     async function cargarClientesEnSelect() {
       const select = document.getElementById('act-cliente');
-      select.innerHTML = '<option value="">Cargando clientes...</option>';
-      
+      if (select) select.innerHTML = '<option value="">Cargando mis clientes...</option>';
+
       const miUsuario = sessionUser ? sessionUser.nombre : '';
       const res = await pushData('obtenerClientes', { usuario: miUsuario });
+
       if (res && Array.isArray(res)) {
         dbClientes = res;
       }
@@ -1055,11 +893,11 @@ function generarHTMLActa(d) {
 
     function renderizarSelectClientes() {
       const select = document.getElementById('act-cliente');
+      if (!select) return;
       select.innerHTML = '<option value="">-- Seleccionar Entidad --</option>';
-      
-      // Filtrar únicamente los clientes pertenecientes al usuario registrado
-      const miUsuario = sessionUser ? sessionUser.nombre : '';
-      const misClientes = dbClientes.filter(c => c.usuarioActual === miUsuario);
+
+      const miUsuario = sessionUser ? sessionUser.nombre.trim().toLowerCase() : '';
+      const misClientes = dbClientes.filter(c => (c.usuarioActual || '').trim().toLowerCase() === miUsuario);
 
       misClientes.forEach((c) => {
         const originalIndex = dbClientes.indexOf(c);
@@ -1069,10 +907,10 @@ function generarHTMLActa(d) {
 
     function renderizarDirectorio(filtro = '') {
       const cont = document.getElementById('lista-directorio');
-      const miUsuario = sessionUser ? sessionUser.nombre : '';
-      
-      // Filtrar estrictamente por el usuario que registró la entidad
-      const misClientes = dbClientes.filter(c => c.usuarioActual === miUsuario);
+      if (!cont) return;
+
+      const miUsuario = sessionUser ? sessionUser.nombre.trim().toLowerCase() : '';
+      const misClientes = dbClientes.filter(c => (c.usuarioActual || '').trim().toLowerCase() === miUsuario);
       const list = misClientes.filter(c => c.nombre.toLowerCase().includes(filtro.toLowerCase()));
 
       if (list.length === 0) {
@@ -1101,38 +939,6 @@ function generarHTMLActa(d) {
       }).join('');
     }
 
-    function renderizarDirectorio(filtro = '') {
-      const cont = document.getElementById('lista-directorio');
-      const miUsuario = sessionUser ? sessionUser.nombre : '';
-      
-      // Filtrar lista por usuario actual y búsqueda de texto
-      const list = dbClientes
-        .filter(c => !c.usuarioActual || c.usuarioActual === miUsuario)
-        .filter(c => c.nombre.toLowerCase().includes(filtro.toLowerCase()));
-
-      if (list.length === 0) {
-        cont.innerHTML = '<div class="col-span-2 text-center py-8 text-slate-400 text-xs">No tienes entidades registradas asociadas a tu usuario.</div>';
-        return;
-      }
-
-      cont.innerHTML = list.map((c, idx) => `
-        <div class="bg-slate-50 hover:bg-rose-50/50 border border-slate-200 hover:border-rose-200 p-3.5 rounded-xl transition-all flex flex-col justify-between">
-          <div>
-            <div class="flex justify-between items-start mb-1">
-              <h4 class="font-bold text-slate-900 text-xs leading-tight">${c.nombre}</h4>
-              <span class="text-[9px] bg-rose-100 text-rose-700 font-bold px-1.5 py-0.5 rounded">Mi Cliente</span>
-            </div>
-            <p class="text-[11px] text-slate-500 font-medium"><i class="fas fa-envelope text-slate-400 mr-1"></i>${c.correo}</p>
-            <p class="text-[11px] text-slate-500"><i class="fas fa-map-marker-alt text-slate-400 mr-1"></i>${c.direccion || 'Sin dirección'}</p>
-            <p class="text-[11px] text-slate-500"><i class="fas fa-user-tie text-slate-400 mr-1"></i>${c.cargoContacto || 'Sin representante'}</p>
-          </div>
-          <button onclick="seleccionarClienteYRedactar(${idx})" class="mt-3 w-full py-1.5 bg-slate-900 hover:bg-rose-600 text-white rounded-lg text-[11px] font-bold transition-all">
-            Redactar Acta <i class="fas fa-arrow-right ml-1"></i>
-          </button>
-        </div>
-      `).join('');
-    }
-
     function filtrarDirectorio() {
       const query = document.getElementById('buscar-directorio').value;
       renderizarDirectorio(query);
@@ -1140,37 +946,43 @@ function generarHTMLActa(d) {
 
     function seleccionarClienteYRedactar(idx) {
       cambiarTab('tab-actas');
-      document.getElementById('act-cliente').value = idx;
-      autoCompletarCliente();
+      const select = document.getElementById('act-cliente');
+      if (select) {
+        select.value = idx;
+        autoCompletarCliente();
+      }
     }
 
     function autoCompletarCliente() {
-      const idx = document.getElementById('act-cliente').value;
-      if (idx !== "") {
+      const select = document.getElementById('act-cliente');
+      if (!select) return;
+
+      const idx = select.value;
+      if (idx !== "" && dbClientes[idx]) {
         const c = dbClientes[idx];
         document.getElementById('act-direccion').value = c.direccion || '';
         document.getElementById('act-asist-cli').value = c.cargoContacto ? c.cargoContacto.split('-')[0].trim() : c.nombre;
-        document.getElementById('act-cargo-cli').value = c.cargoContacto && c.cargoContacto.includes('-') ? c.cargoContacto.split('-')[1].trim() : 'Representante';
+        document.getElementById('act-cargo-cli').value = c.cargoContacto && c.cargoContacto.includes('-') ? c.cargoContacto.split('-')[1].trim() : '';
         document.getElementById('act-correo-cli').value = c.correo || '';
       }
     }
 
     function obtenerDatosFormularioActa() {
       const select = document.getElementById('act-cliente');
-      const clienteNombre = select.selectedIndex > 0 ? select.options[select.selectedIndex].text : "Cliente General";
+      const clienteNombre = select && select.selectedIndex > 0 ? select.options[select.selectedIndex].text : "Cliente General";
       
       return {
         clienteNombre: clienteNombre,
-        clienteCorreo: document.getElementById('act-correo-cli').value,
+        clienteCorreo: document.getElementById('act-correo-cli').value || "",
         fecha: document.getElementById('act-fecha').value || new Date().toISOString().split('T')[0],
-        ciudad: document.getElementById('act-ciudad').value || "Portoviejo",
-        direccion: document.getElementById('act-direccion').value || "Vía Crucita",
-        asistentesCliente: document.getElementById('act-asist-cli').value || "Ing. Karen Cedeño",
-        cargoCliente: document.getElementById('act-cargo-cli').value || "Jefe de Agencia",
-        asistentesG4S: document.getElementById('act-asist-g4s').value || "Ing. Gabriela Molina",
-        cargoG4S: document.getElementById('act-cargo-g4s').value || "Jefe de Agencia",
-        temasTratados: document.getElementById('act-temas').value || "Novedades con el personal\nNovedades con el servicio\nCumplimiento de consignas",
-        conclusiones: document.getElementById('act-conclusiones').value || "Cliente indica personal y servicio sin novedad.",
+        ciudad: document.getElementById('act-ciudad').value || "",
+        direccion: document.getElementById('act-direccion').value || "",
+        asistentesCliente: document.getElementById('act-asist-cli').value || "",
+        cargoCliente: document.getElementById('act-cargo-cli').value || "",
+        asistentesG4S: document.getElementById('act-asist-g4s').value || "",
+        cargoG4S: document.getElementById('act-cargo-g4s').value || "",
+        temasTratados: document.getElementById('act-temas').value || "",
+        conclusiones: document.getElementById('act-conclusiones').value || "",
         usuarioNombre: sessionUser ? sessionUser.nombre : "Agente G4S",
         usuarioCorreo: sessionUser ? sessionUser.correo : "operaciones@g4s.com"
       };
@@ -1178,20 +990,34 @@ function generarHTMLActa(d) {
 
     function generarVistaPreviaPDF() {
       const data = obtenerDatosFormularioActa();
+      mostrarVistaPreviaPDF(data);
+    }
+
+    function mostrarVistaPreviaPDF(data) {
+      // Limpiar formato de fecha si viene en string largo o vacio
+      let fechaLimpia = data.fecha || new Date().toISOString().split('T')[0];
+      if (fechaLimpia.includes('GMT') || fechaLimpia.includes('T')) {
+        const dObj = new Date(fechaLimpia);
+        if (!isNaN(dObj.getTime())) {
+          fechaLimpia = dObj.toISOString().split('T')[0];
+        }
+      }
+
+      document.getElementById('pv-fecha').innerText = fechaLimpia;
+      document.getElementById('pv-cliente').innerText = data.clienteNombre || "---";
+      document.getElementById('pv-ciudad').innerText = data.ciudad || "---";
+      document.getElementById('pv-direccion').innerText = data.direccion || "---";
+      document.getElementById('pv-asist-cli').innerHTML = `${data.asistentesCliente || "---"} ${data.cargoCliente ? '<span class="text-slate-500 text-[10px]">(' + data.cargoCliente + ')</span>' : ''}`;
+      document.getElementById('pv-asist-g4s').innerHTML = `${data.asistentesG4S || "---"}`;
+      document.getElementById('pv-temas').innerText = data.temasTratados || "---";
+      document.getElementById('pv-conclusiones').innerText = data.conclusiones || "---";
       
-      document.getElementById('pv-fecha').innerText = data.fecha;
-      document.getElementById('pv-cliente').innerText = data.clienteNombre;
-      document.getElementById('pv-ciudad').innerText = data.ciudad;
-      document.getElementById('pv-direccion').innerText = data.direccion;
-      document.getElementById('pv-asist-cli').innerHTML = `${data.asistentesCliente} <span class="text-slate-500 text-[10px]">(${data.cargoCliente})</span>`;
-      document.getElementById('pv-asist-g4s').innerHTML = `${data.asistentesG4S} <span class="text-slate-500 text-[10px]">(${data.cargoG4S})</span>`;
-      document.getElementById('pv-temas').innerText = data.temasTratados;
-      document.getElementById('pv-conclusiones').innerText = data.conclusiones;
+      document.getElementById('pv-sig-name-cli').innerText = data.asistentesCliente || "---";
+      document.getElementById('pv-sig-role-cli').innerText = `${data.cargoCliente ? data.cargoCliente + ' • ' : ''}${data.clienteNombre || ''}`;
+      document.getElementById('pv-sig-name-g4s').innerText = data.asistentesG4S || "---";
       
-      document.getElementById('pv-sig-name-cli').innerText = data.asistentesCliente;
-      document.getElementById('pv-sig-role-cli').innerText = `${data.cargoCliente} • ${data.clienteNombre}`;
-      document.getElementById('pv-sig-name-g4s').innerText = data.asistentesG4S;
-      document.getElementById('pv-sig-role-g4s').innerText = `${data.cargoG4S} • G4S`;
+      // Requerimiento exacto: Unicamente la palabra "G4S" debajo de la firma de G4S
+      document.getElementById('pv-sig-role-g4s').innerText = "G4S";
 
       document.getElementById('modal-preview').classList.remove('hidden');
     }
@@ -1213,7 +1039,7 @@ function generarHTMLActa(d) {
     }
 
     async function generarActa(e) {
-      e.preventDefault();
+      if (e) e.preventDefault();
       const btn = document.getElementById('btn-acta');
       btn.disabled = true;
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Emitiendo Acta...';
@@ -1245,9 +1071,12 @@ function generarHTMLActa(d) {
 
     async function cargarHistorial() {
       const tbody = document.getElementById('tabla-historial');
+      if (!tbody) return;
+
       tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center"><i class="fas fa-spinner fa-spin text-xl text-rose-600 mb-2"></i><br>Cargando registros de auditoría...</td></tr>`;
 
-      const res = await pushData('obtenerHistorial', { usuario: sessionUser.nombre });
+      const miUsuario = sessionUser ? sessionUser.nombre : '';
+      const res = await pushData('obtenerHistorial', { usuario: miUsuario });
       if (res && Array.isArray(res)) {
         dbHistorial = res;
         aplicarFiltros();
@@ -1268,7 +1097,7 @@ function generarHTMLActa(d) {
           const parts = h.fecha.split(/[-/]/);
           if (parts.length === 3) d = parts[0].length === 4 ? new Date(parts[0], parts[1] - 1, parts[2]) : new Date(parts[2], parts[1] - 1, parts[0]);
         }
-        if (fCliente && !h.cliente.toLowerCase().includes(fCliente)) match = false;
+        if (fCliente && !(h.cliente || '').toLowerCase().includes(fCliente)) match = false;
         if (d) {
           if (fDesde && d < new Date(fDesde)) match = false;
           if (fHasta && d > new Date(fHasta)) match = false;
@@ -1277,58 +1106,69 @@ function generarHTMLActa(d) {
       });
 
       const tbody = document.getElementById('tabla-historial');
+      if (!tbody) return;
+
       if (filt.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">No se encontraron expedientes con los criterios seleccionados.</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = filt.map(h => `
+      tbody.innerHTML = filt.map(h => {
+        const originalIndex = dbHistorial.indexOf(h);
+        
+        // Limpieza de formato visual para fecha corta
+        let fechaMostrar = h.fecha || '---';
+        if (fechaMostrar.includes('GMT') || fechaMostrar.includes('T')) {
+          const dObj = new Date(fechaMostrar);
+          if (!isNaN(dObj.getTime())) {
+            fechaMostrar = dObj.toISOString().split('T')[0];
+          }
+        }
+
+        return `
         <tr class="hover:bg-slate-50 border-b border-slate-100 transition-colors">
           <td class="p-4 font-mono font-black text-rose-600">${h.id}</td>
-          <td class="p-4 font-bold text-slate-600">${h.fecha}</td>
-          <td class="p-4 font-black text-slate-800">${h.cliente}</td>
-          <td class="p-4 text-slate-600">${h.ciudad || 'Portoviejo'}</td>
-          <td class="p-4 text-slate-500 max-w-xs truncate">${h.conclusiones}</td>
+          <td class="p-4 font-bold text-slate-600">${fechaMostrar}</td>
+          <td class="p-4 font-black text-slate-800">${h.cliente || '---'}</td>
+          <td class="p-4 text-slate-600">${h.ciudad || '---'}</td>
+          <td class="p-4 text-slate-500 max-w-xs truncate">${h.conclusiones || '---'}</td>
           <td class="p-4 text-center">
-            <button onclick="generarVistaPreviaPDF()" class="p-2 bg-slate-100 hover:bg-rose-600 hover:text-white text-slate-700 rounded-lg text-xs font-bold transition-all" title="Ver Acta">
+            <button onclick="verActaHistorial(${originalIndex})" class="p-2 bg-slate-100 hover:bg-rose-600 hover:text-white text-slate-700 rounded-lg text-xs font-bold transition-all" title="Ver Acta Completa">
               <i class="fas fa-file-pdf"></i>
             </button>
           </td>
         </tr>
-      `).join('');
+      `;
+      }).join('');
     }
 
-    function abrirConfiguracionURL() {
-      document.getElementById('modal-url').classList.remove('hidden');
-    }
+    function verActaHistorial(idx) {
+      const h = dbHistorial[idx];
+      if (!h) return;
 
-    function cerrarModalURL() {
-      document.getElementById('modal-url').classList.add('hidden');
-    }
-
-    function guardarNuevoURL() {
-      const url = document.getElementById('cfg-app-url').value.trim();
-      if (url) {
-        APP_URL = url;
-        localStorage.setItem('g4s_custom_url', url);
-        mostrarToast("Enlace de Apps Script actualizado correctamente", "success");
-        cerrarModalURL();
+      let fechaLimpia = h.fecha || new Date().toISOString().split('T')[0];
+      if (fechaLimpia.includes('GMT') || fechaLimpia.includes('T')) {
+        const dObj = new Date(fechaLimpia);
+        if (!isNaN(dObj.getTime())) {
+          fechaLimpia = dObj.toISOString().split('T')[0];
+        }
       }
-    }
 
-    function restablecerURLPredeterminada() {
-      APP_URL = DEFAULT_APP_URL;
-      localStorage.removeItem('g4s_custom_url');
-      document.getElementById('cfg-app-url').value = DEFAULT_APP_URL;
-      mostrarToast("URL restablecida a la predeterminada", "success");
-      cerrarModalURL();
-    }
+      const dataObj = {
+        clienteNombre: h.cliente || '---',
+        clienteCorreo: h.correo || '',
+        fecha: fechaLimpia,
+        ciudad: h.ciudad || '---',
+        direccion: h.direccion || '---',
+        asistentesCliente: h.asistentesCliente || h.asistCli || '---',
+        cargoCliente: h.cargoCliente || h.cargoCli || '',
+        asistentesG4S: h.asistentesG4S || h.asistG4S || '---',
+        cargoG4S: h.cargoG4S || '',
+        temasTratados: h.temas || h.temasTratados || '---',
+        conclusiones: h.conclusiones || '---'
+      };
 
-    function copiarCodigoAppsScript() {
-      const area = document.getElementById('codigo-script');
-      area.select();
-      document.execCommand('copy');
-      mostrarToast("Código backend copiado al portapapeles", "success");
+      mostrarVistaPreviaPDF(dataObj);
     }
   </script>
 </body>
